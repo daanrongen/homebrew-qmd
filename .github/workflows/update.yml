@@ -1,9 +1,9 @@
 name: Update formula
 
+# Push a tag matching a published @tobilu/qmd version, e.g. `git tag v2.8.4 && git push origin v2.8.4`.
 on:
-  schedule:
-    - cron: "17 6 * * *"
-  workflow_dispatch:
+  push:
+    tags: ["v*"]
 
 permissions:
   contents: write
@@ -11,12 +11,16 @@ permissions:
 jobs:
   update:
     runs-on: macos-latest
+    env:
+      VERSION: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
-      - name: Point the formula at the latest npm release
+      - name: Point the formula at the tagged npm release
         run: |
-          VERSION="$(npm view @tobilu/qmd version)"
+          VERSION="${VERSION#v}"
           URL="https://registry.npmjs.org/@tobilu/qmd/-/qmd-$VERSION.tgz"
           SHA256="$(curl -fsSL "$URL" | shasum -a 256 | cut -d' ' -f1)"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
@@ -44,4 +48,4 @@ jobs:
             exit 0
           fi
           git commit -m "qmd v$VERSION"
-          git push
+          git push origin HEAD:main
