@@ -6,15 +6,15 @@ class Qmd < Formula
   sha256 "2e60829913a0c646234a905cefd61043167a1392fdcfd19bc54f890af89ca0f0"
   license "MIT"
 
-  depends_on "node@24"
+  depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
     # audit rejects the other mac arch's prebuilds
     other_arch = Hardware::CPU.arm? ? "darwin-x64" : "darwin-arm64"
     rm_r libexec.glob("lib/node_modules/@tobilu/qmd/node_modules/**/prebuilds/#{other_arch}{,.node}")
-    # pins the node qmd runs under, whatever is first on PATH
-    (bin/"qmd").write_env_script libexec/"bin/qmd", PATH: "#{formula_opt_bin("node@24")}:$PATH"
+    # runs under the node the native modules were built against, whatever is first on PATH
+    (bin/"qmd").write_env_script libexec/"bin/qmd", PATH: "#{formula_opt_bin("node")}:$PATH"
   end
 
   def caveats
